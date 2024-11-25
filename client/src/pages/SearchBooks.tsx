@@ -50,10 +50,11 @@ const SearchBooks = () => {
 
       const bookData = items.map((book: GoogleAPIBook) => ({
         bookId: book.id,
-        authors: book.volumeInfo.authors || ['No author to display'],
         title: book.volumeInfo.title,
+        authors: book.volumeInfo.authors || ['No author to display'],
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
+        link: book.volumeInfo.infoLink || '', // Add a link if available
       }));
 
       setSearchedBooks(bookData);
@@ -78,16 +79,17 @@ const SearchBooks = () => {
 
     try {
       await saveBook({
-        variables: { bookData: { 
-          bookId: bookToSave.bookId,
-          authors: bookToSave.authors,
-          title: bookToSave.title,
-          description: bookToSave.description,
-          image: bookToSave.image,
-          link: '' // Add a link if available
-        }},
+        variables: {
+          bookData: {
+            bookId: bookToSave.bookId,
+            title: bookToSave.title,
+            authors: bookToSave.authors,
+            description: bookToSave.description,
+            image: bookToSave.image,
+            link: bookToSave.link // Use the link from the API
+          }
+        },
       });
-
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {

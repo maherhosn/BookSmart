@@ -33,10 +33,10 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
     }
 
     try {
+      console.log("trying to add first!")
       const { data } = await addUser({
         variables: { ...userFormData },
       });
-
       // Get the token from the response
       const token = data.addUser.token;
       Auth.login(token);

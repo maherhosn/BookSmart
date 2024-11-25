@@ -10,7 +10,7 @@ import {
 
 // import middleware
 import { authenticateToken } from '../../services/auth.js';
-
+console.log("I am in the user-Routes!!!");
 // put authMiddleware anywhere we need to send a token for verification of user
 router.route('/').post(createUser).put(authenticateToken, saveBook);
 

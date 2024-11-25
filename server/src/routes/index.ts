@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import apiRoutes from './api/index.js';
+console.log("this is in the index.ts under routes!!!");
 
 router.use('/api', apiRoutes);
 

@@ -1,17 +1,18 @@
-// see SignupForm.js for comments
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-
-import { loginUser } from '../utils/API';
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../utils/mutations'; // Import the LOGIN_USER mutation
 import Auth from '../utils/auth';
 import type { User } from '../models/User';
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
-const LoginForm = ({}: { handleModalClose: () => void }) => {
+const LoginForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
   const [userFormData, setUserFormData] = useState<User>({ username: '', email: '', password: '', savedBooks: [] });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+
+  // Use the LOGIN_USER mutation
+  const [loginUser] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -21,27 +22,27 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // check if form has everything (as per react-bootstrap docs)
+    // Check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
     }
-
+    console.log("this is the data" );
     try {
-      const response = await loginUser(userFormData);
-
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const { token } = await response.json();
+      const { data } = await loginUser({
+        variables: { email: userFormData.email, password: userFormData.password },
+      });
+      // Get the token from the response
+      const token = data.login.token;
       Auth.login(token);
+      // handleModalClose(); // Close the modal upon successful login
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
 
+    // Reset the form data
     setUserFormData({
       username: '',
       email: '',

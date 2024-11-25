@@ -34,9 +34,9 @@ export const SAVE_BOOK = gql`
       email
       savedBooks {
         bookId
+        title
         authors
         description
-        title
         image
         link
       }

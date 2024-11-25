@@ -3,6 +3,7 @@ declare namespace Express {
     user: {
       _id: unknown;
       username: string;
+      email: string;
     };
   }
 }

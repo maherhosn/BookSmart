@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import { signToken } from '../services/auth.js';
 
 interface UserArgs {
-  id: string;
+  _id: string;
   username: string;
 }
 
@@ -18,10 +18,10 @@ interface Context {
 const resolvers = {
   Query: {
 
-    me: async (_parent: any, _args: any, context: Context):Promise<UserArgs | null> => {
+    me: async (_parent: any, _args: any, context: Context): Promise<UserArgs | null> => {
       // Check if user is authenticated
       if (context.user) {
-        const userData = await User.findById(context.user.id).populate('savedBooks');
+        const userData = await User.findById(context.user._id).populate('savedBooks');
         return userData;
       }
       throw new Error('Not logged in');
@@ -31,9 +31,9 @@ const resolvers = {
       return await User.find();
     },
 
-    getSingleUser: async (_: unknown, { id, username }: UserArgs) => {
+    getSingleUser: async (_: unknown, { _id, username }: UserArgs) => {
       const foundUser = await User.findOne({
-        $or: [{ _id: id }, { username }],
+        $or: [{ _id: _id }, { username }],
       });
 
       if (!foundUser) {
@@ -46,28 +46,33 @@ const resolvers = {
   Mutation: {
     addUser: async (_: unknown, { username, email, password }: AddUserArgs) => {
       const user = await User.create({ username, email, password });
-
       if (!user) {
         throw new Error('Something is wrong!');
       }
+      // Generate token using username, email, and user ID
       const token = signToken(user.username, user.password, user._id);
       return { token, user };
     },
+
     login: async (_: unknown, { username, email, password }: AddUserArgs) => {
       const user = await User.findOne({ $or: [{ username }, { email }] });
       if (!user) {
         throw new Error("Can't find this user");
       }
 
+      // Verify the password using the method defined in the User model
       const correctPw = await user.isCorrectPassword(password);
+  
 
       if (!correctPw) {
         throw new Error('Wrong password!');
       }
+      // Generate token using username, email, and user ID
       const token = signToken(user.username, user.password, user._id);
       return { token, user };
     },
-    saveBook: async (_:unknown, { bookData }:any, { user }:any) => {
+
+    saveBook: async (_: unknown, { bookData }: any, { user }: any) => {
       if (!user) {
         throw new Error('Not authenticated');
       }
@@ -78,7 +83,7 @@ const resolvers = {
       );
       return updatedUser;
     },
-    removeBook: async (_:unknown, { bookId }:any, { user }:any) => {
+    removeBook: async (_: unknown, { bookId }: any, { user }: any) => {
       if (!user) {
         throw new Error('Not authenticated');
       }
